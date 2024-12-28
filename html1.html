@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Printing Estimation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9f5e9;
+            border: 1px solid #d4edda;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>3D Printing Estimation</h1>
+        <div class="form-group">
+            <label for="material-type">Material Type</label>
+            <select id="material-type">
+                <option value="">Select Material Type</option>
+                <option value="Filament">Filament</option>
+                <option value="Resin">Resin</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="material">Material</label>
+            <select id="material" disabled>
+                <option value="">Select Material</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="volume">Model Volume (cm³)</label>
+            <input type="number" id="volume" placeholder="Enter volume" min="0">
+        </div>
+        <div class="form-group">
+            <label for="surface-area">Model Surface Area (cm²)</label>
+            <input type="number" id="surface-area" placeholder="Enter surface area" min="0">
+        </div>
+        <button id="calculate">Calculate Estimate</button>
+        <div id="result" class="result hidden"></div>
+    </div>
+
+    <script>
+        const materialTypeSelect = document.getElementById('material-type');
+        const materialSelect = document.getElementById('material');
+        const volumeInput = document.getElementById('volume');
+        const surfaceAreaInput = document.getElementById('surface-area');
+        const calculateButton = document.getElementById('calculate');
+        const resultDiv = document.getElementById('result');
+
+        const materials = {
+            Filament: [
+                { name: 'PLA', basePrice: 0.05, postProcess: 0.02 },
+                { name: 'ABS', basePrice: 0.06, postProcess: 0.025 }
+            ],
+            Resin: [
+                { name: 'Standard Resin', basePrice: 0.1, postProcess: 0.03 },
+                { name: 'ABS-like Resin', basePrice: 0.12, postProcess: 0.035 }
+            ]
+        };
+
+        materialTypeSelect.addEventListener('change', () => {
+            const type = materialTypeSelect.value;
+            materialSelect.innerHTML = '<option value="">Select Material</option>';
+            if (type && materials[type]) {
+                materials[type].forEach(material => {
+                    const option = document.createElement('option');
+                    option.value = material.name;
+                    option.textContent = material.name;
+                    materialSelect.appendChild(option);
+                });
+                materialSelect.disabled = false;
+            } else {
+                materialSelect.disabled = true;
+            }
+        });
+
+        calculateButton.addEventListener('click', () => {
+            const materialType = materialTypeSelect.value;
+            const materialName = materialSelect.value;
+            const volume = parseFloat(volumeInput.value);
+            const surfaceArea = parseFloat(surfaceAreaInput.value);
+
+            if (!materialType || !materialName || isNaN(volume) || isNaN(surfaceArea)) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            const material = materials[materialType].find(m => m.name === materialName);
+            const totalCost = (volume * material.basePrice) + (surfaceArea * material.postProcess);
+
+            resultDiv.textContent = `Material: ${materialName}\nTotal Cost: $${totalCost.toFixed(2)}\n(Base Price: $${(volume * material.basePrice).toFixed(2)}, Post-Processing: $${(surfaceArea * material.postProcess).toFixed(2)})`;
+            resultDiv.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
